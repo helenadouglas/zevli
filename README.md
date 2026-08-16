@@ -1,39 +1,71 @@
 # Zevli
 
-A personal health dashboard for iPhone and Apple Watch, built with SwiftUI and HealthKit.
+A simple, privacy-focused health dashboard for iPhone and Apple Watch, built with SwiftUI and HealthKit.
 
-Zevli brings together health and activity data in a simple interface, with quick insights on iPhone and glanceable complications on Apple Watch.
+Zevli turns data from Apple Health into an easy-to-read daily overview — combining sleep, recovery, heart metrics and activity without overwhelming you with numbers.
+
+On iPhone, Zevli provides a daily health dashboard, recovery insights and detailed sleep information. On Apple Watch, the same data is available at a glance through custom complications.
 
 ## Features
 
 ### iPhone
 
-- Daily health overview
-- Daily Vibe score based on recovery signals
-- Sleep score and detailed sleep insights
-- HRV and resting heart rate
-- Steps and active energy
-- Simple daily health insights
-- Health data pulled directly from Apple Health
+- **Daily Vibe** — a simple daily recovery score based on sleep, HRV and resting heart rate
+- Daily overview of your key health metrics
+- Sleep score with detailed sleep stages and interruptions
+- HRV and resting heart rate tracking
+- Heart rate, steps and active energy
+- Daily check-in to compare how you feel with what your health data suggests
+- Simple, contextual health insights
+- Direct integration with Apple Health
 
 ### Apple Watch
 
 - Apple Watch companion app
-- Custom complications
-- Activity rings for Move, Exercise and Stand
+- Custom complications designed for quick, glanceable information
+- Daily Vibe and recovery status
 - Sleep Score
-- Readiness
-- Steps
-- Daily Vibe / recovery information
-- Multiple complication styles
+- Steps and heart rate
+- Activity rings for Move, Exercise and Stand
+- Multiple complication layouts for different watch faces
 
-## Health Data
+## Daily Vibe
 
-Zevli uses HealthKit to read health and activity data from Apple Health.
+Daily Vibe is Zevli's way of turning several recovery signals into one simple score.
 
-The app currently uses metrics including:
+The score combines:
 
-- Sleep duration
+- Sleep
+- Heart rate variability (HRV)
+- Resting heart rate
+
+Rather than treating one measurement as the full picture, Zevli brings these signals together to provide a quick indication of how recovered you may be that day.
+
+You can also check in with how you actually feel, because numbers are only half the story.
+
+## Sleep Insights
+
+Zevli provides a dedicated view for understanding your previous night's sleep.
+
+Alongside total sleep duration, you can see:
+
+- Sleep Score
+- Fell asleep and wake-up times
+- REM sleep
+- Core sleep
+- Deep sleep
+- Time awake
+- Overnight interruptions
+
+The sleep score focuses on sleep duration and interruptions to provide a simple overview without trying to turn every sleep metric into a target.
+
+## Health & Privacy
+
+Zevli uses HealthKit to read health and activity information stored in Apple Health.
+
+Currently supported metrics include:
+
+- Sleep duration and sleep stages
 - Sleep interruptions
 - Heart rate variability (HRV)
 - Resting heart rate
@@ -43,23 +75,27 @@ The app currently uses metrics including:
 - Exercise minutes
 - Stand hours
 
-Health data stays within the Apple ecosystem and is used to generate the information displayed by the app.
+Health data is accessed through Apple's HealthKit APIs and is used to generate the information displayed within Zevli.
 
-## Tech
+Zevli does not require you to create an account or manually enter your health data.
+
+## Built With
 
 - Swift
 - SwiftUI
 - HealthKit
 - WidgetKit
 - App Intents
-- watchOS
 - iOS
+- watchOS
 
-## Status
+## Project Status
 
 Zevli is currently a personal project and is under active development.
 
-The project started as a way to experiment with Apple Health data and custom Apple Watch complications, and has gradually grown into a small health dashboard for both iPhone and Apple Watch.
+It started as an experiment with Apple Health data and custom Apple Watch complications, and has gradually grown into a complete health dashboard across iPhone and Apple Watch.
+
+There is still plenty I want to explore and improve, particularly around longer-term insights, recovery scoring and making health data easier to understand without adding unnecessary complexity.
 
 ## Zevli on iPhone
 
@@ -67,15 +103,13 @@ The project started as a way to experiment with Apple Health data and custom App
 
 Your sleep, recovery, heart metrics and activity in one simple daily view.
 
-<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/44e5af27-17f0-4af5-8ddc-9976328e75bc" />
-
+<img src="https://github.com/user-attachments/assets/44e5af27-17f0-4af5-8ddc-9976328e75bc" width="750" alt="Zevli iPhone dashboard" />
 
 ### A closer look at your sleep
 
 Sleep score, duration, stages and overnight insights.
 
-<img width="877" height="1793" alt="image" src="https://github.com/user-attachments/assets/e400906b-ee29-4e77-a395-f03925bd3e15" />
-
+<img src="https://github.com/user-attachments/assets/e400906b-ee29-4e77-a395-f03925bd3e15" width="350" alt="Zevli sleep insights" />
 
 ## Zevli on Apple Watch
 
@@ -83,8 +117,7 @@ Sleep score, duration, stages and overnight insights.
 
 Daily Vibe, activity, sleep and health metrics through glanceable complications.
 
-<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/f369fd43-ca8e-4ec7-822d-d6e052e0b7a0" />
-
+<img src="https://github.com/user-attachments/assets/f369fd43-ca8e-4ec7-822d-d6e052e0b7a0" width="750" alt="Zevli Apple Watch" />
 
 
 ## Disclaimer
