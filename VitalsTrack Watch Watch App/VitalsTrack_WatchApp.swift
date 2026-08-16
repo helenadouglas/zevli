@@ -7,16 +7,23 @@
 
 import SwiftUI
 
+
 @main
 struct VitalsTrack_Watch_Watch_AppApp: App {
 
-    private let backgroundManager = HealthBackgroundManager()
+    private let healthBackgroundManager =
+        HealthBackgroundManager()
+
 
     var body: some Scene {
+
         WindowGroup {
+
             ContentView()
                 .task {
-                    await backgroundManager.start()
+
+                    await healthBackgroundManager
+                        .start()
                 }
         }
     }

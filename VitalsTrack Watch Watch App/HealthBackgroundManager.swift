@@ -11,28 +11,61 @@ import HealthKit
 
 final class HealthBackgroundManager {
 
-    private let healthStore = HKHealthStore()
+    private let healthStore =
+        HKHealthStore()
+
 
     private let healthProvider =
         WatchHealthDataProvider()
 
+
     private var observerQueries:
         [HKObserverQuery] = []
+
+
+    private var hasStarted =
+        false
 
 
     // MARK: - Start
 
     func start() async {
 
+        guard !hasStarted else {
+            return
+        }
+
+
+        hasStarted = true
+
+
         guard
-            HKHealthStore.isHealthDataAvailable()
+            HKHealthStore
+                .isHealthDataAvailable()
         else {
             return
         }
 
 
-        await enableBackgroundDelivery()
+        print(
+            "Starting Zevli HealthKit background manager"
+        )
+
+
+        // Start observer queries immediately.
+        // HealthKit can then wake the app when matching
+        // health samples are added or changed.
         startObserverQueries()
+
+
+        // Register the HealthKit types for background delivery.
+        await enableBackgroundDelivery()
+
+
+        // Always create a fresh snapshot when the Watch app
+        // itself launches.
+        await healthProvider
+            .refreshSharedSnapshot()
     }
 
 
@@ -53,6 +86,7 @@ final class HealthBackgroundManager {
                         for: type,
                         frequency: .immediate
                     )
+
 
                 print(
                     "Background delivery enabled:",
@@ -99,10 +133,17 @@ final class HealthBackgroundManager {
                             error
                         )
 
+
                         completionHandler()
 
                         return
                     }
+
+
+                    print(
+                        "HealthKit background change:",
+                        type.identifier
+                    )
 
 
                     Task {
@@ -124,6 +165,12 @@ final class HealthBackgroundManager {
 
             healthStore.execute(
                 query
+            )
+
+
+            print(
+                "Health observer started:",
+                type.identifier
             )
         }
     }

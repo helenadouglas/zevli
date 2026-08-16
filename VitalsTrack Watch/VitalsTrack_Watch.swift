@@ -40,9 +40,21 @@ struct Provider: AppIntentTimelineProvider {
                 configuration: configuration
             )
 
+
+        let nextRefresh =
+            Calendar.current.date(
+                byAdding: .minute,
+                value: 15,
+                to: Date()
+            )
+            ?? Date().addingTimeInterval(
+                15 * 60
+            )
+
+
         return Timeline(
             entries: [entry],
-            policy: .never
+            policy: .after(nextRefresh)
         )
     }
 
