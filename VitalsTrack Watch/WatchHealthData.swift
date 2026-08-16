@@ -51,6 +51,16 @@ final class WatchHealthDataProvider {
     }
 
 
+    // MARK: - Activity Goals
+
+    private struct ActivityGoals {
+
+        let moveGoal: Double
+        let exerciseGoal: Double
+        let standGoal: Double
+    }
+
+
     // MARK: - Refresh Shared Snapshot
 
     func refreshSharedSnapshot() async {
@@ -81,10 +91,11 @@ final class WatchHealthDataProvider {
         async let standTask =
             todayStandHours()
 
+        async let activityGoalsTask =
+            todayActivityGoals()
 
         async let sleepHistoryTask =
             fetchSleepNights()
-
 
         async let hrvTask =
             latestHRV()
@@ -101,6 +112,7 @@ final class WatchHealthDataProvider {
             activeEnergy,
             exerciseMinutes,
             standHours,
+            activityGoals,
             sleepNights,
             hrv,
             restingHeartRate,
@@ -110,11 +122,27 @@ final class WatchHealthDataProvider {
             energyTask,
             exerciseTask,
             standTask,
+            activityGoalsTask,
             sleepHistoryTask,
             hrvTask,
             restingHRTask,
             heartRateTask
         )
+
+
+        let moveGoal =
+            activityGoals?.moveGoal
+            ?? 300
+
+
+        let exerciseGoal =
+            activityGoals?.exerciseGoal
+            ?? 30
+
+
+        let standGoal =
+            activityGoals?.standGoal
+            ?? 10
 
 
         let currentNight =
@@ -201,7 +229,7 @@ final class WatchHealthDataProvider {
         let strain =
             min(
                 activeEnergy
-                / 600
+                / max(moveGoal, 1)
                 * 100,
                 100
             )
@@ -243,6 +271,15 @@ final class WatchHealthDataProvider {
 
                 standHours:
                     standHours,
+
+                moveGoal:
+                    moveGoal,
+
+                exerciseGoal:
+                    exerciseGoal,
+
+                standGoal:
+                    standGoal,
 
                 recovery:
                     readiness,
@@ -322,6 +359,21 @@ final class WatchHealthDataProvider {
         print(
             "Stand:",
             standHours
+        )
+
+        print(
+            "Move goal:",
+            moveGoal
+        )
+
+        print(
+            "Exercise goal:",
+            exerciseGoal
+        )
+
+        print(
+            "Stand goal:",
+            standGoal
         )
 
         print(
@@ -410,7 +462,8 @@ final class WatchHealthDataProvider {
                 sleepType,
                 hrvType,
                 restingHRType,
-                heartRateType
+                heartRateType,
+                HKObjectType.activitySummaryType()
             ]
 
 
@@ -435,6 +488,113 @@ final class WatchHealthDataProvider {
 
 
             return false
+        }
+    }
+
+
+    // MARK: - Activity Goal Query
+
+    private func todayActivityGoals()
+        async -> ActivityGoals? {
+
+        let calendar =
+            Calendar.current
+
+
+            var components =
+                calendar.dateComponents(
+                    [
+                        .era,
+                        .year,
+                        .month,
+                        .day
+                    ],
+                    from: Date()
+                )
+
+            components.calendar = calendar
+            components.timeZone = calendar.timeZone
+
+
+        let predicate =
+            HKQuery.predicateForActivitySummary(
+                with: components
+            )
+
+
+        return await withCheckedContinuation {
+            continuation in
+
+
+            let query =
+                HKActivitySummaryQuery(
+                    predicate: predicate
+                ) {
+                    _,
+                    summaries,
+                    error in
+
+
+                    guard
+                        error == nil,
+                        let summary =
+                            summaries?.first
+                    else {
+
+                        continuation.resume(
+                            returning: nil
+                        )
+
+                        return
+                    }
+
+
+                    let moveGoal =
+                        summary
+                            .activeEnergyBurnedGoal
+                            .doubleValue(
+                                for:
+                                    .kilocalorie()
+                            )
+
+
+                    let exerciseGoal =
+                        summary
+                            .appleExerciseTimeGoal
+                            .doubleValue(
+                                for:
+                                    .minute()
+                            )
+
+
+                    let standGoal =
+                        summary
+                            .appleStandHoursGoal
+                            .doubleValue(
+                                for:
+                                    .count()
+                            )
+
+
+                    continuation.resume(
+                        returning:
+                            ActivityGoals(
+                                moveGoal:
+                                    moveGoal,
+
+                                exerciseGoal:
+                                    exerciseGoal,
+
+                                standGoal:
+                                    standGoal
+                            )
+                    )
+                }
+
+
+            healthStore.execute(
+                query
+            )
         }
     }
 

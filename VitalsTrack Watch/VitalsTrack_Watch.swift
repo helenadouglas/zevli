@@ -130,6 +130,10 @@ struct Provider: AppIntentTimelineProvider {
             exerciseMinutes: snapshot.exerciseMinutes,
             standHours: snapshot.standHours,
 
+            moveGoal: snapshot.moveGoal,
+            exerciseGoal: snapshot.exerciseGoal,
+            standGoal: snapshot.standGoal,
+
             recovery: snapshot.recovery,
             strain: snapshot.strain
         )
@@ -158,6 +162,10 @@ struct SimpleEntry: TimelineEntry {
     let activeEnergy: Double
     let exerciseMinutes: Double
     let standHours: Double
+
+    let moveGoal: Double
+    let exerciseGoal: Double
+    let standGoal: Double
 
     let recovery: Double
     let strain: Double
@@ -295,6 +303,15 @@ extension HealthMetric {
             return "bolt.fill"
         }
     }
+
+
+    var deepLinkURL: URL? {
+
+        URL(
+            string:
+                "zevli://metric/\(rawValue)"
+        )
+    }
 }
 
 
@@ -402,13 +419,13 @@ extension SimpleEntry {
 
         case .activeEnergy:
             return min(
-                activeEnergy / 500,
+                activeEnergy / max(moveGoal, 1),
                 1
             )
 
         case .exercise:
             return min(
-                exerciseMinutes / 30,
+                exerciseMinutes / max(exerciseGoal, 1),
                 1
             )
         }
@@ -557,75 +574,81 @@ struct VitalsTrack_WatchEntryView: View {
 
     var body: some View {
 
-        switch family {
+        Group {
 
-        case .accessoryCircular:
+            switch family {
 
-            CircularComplicationView(
-                metric: normalizedMetric,
-                style: style,
-                entry: entry
-            )
+            case .accessoryCircular:
 
-
-        case .accessoryRectangular:
-
-            if metric == .activityRings {
-
-                ActivityRingsRectangularView(
-                    entry: entry
-                )
-
-            } else if metric == .dailyVibe {
-
-                DailyVibeRectangularView(
-                    entry: entry
-                )
-
-            } else {
-
-                RectangularMetricView(
-                    metric: metric,
+                CircularComplicationView(
+                    metric: normalizedMetric,
                     style: style,
                     entry: entry
                 )
-            }
 
 
-        case .accessoryInline:
+            case .accessoryRectangular:
 
-            Label(
-                "\(normalizedMetric.displayName) \(entry.formattedValue(for: normalizedMetric))",
-                systemImage:
-                    normalizedMetric.systemImage
-            )
+                if metric == .activityRings {
+
+                    ActivityRingsRectangularView(
+                        entry: entry
+                    )
+
+                } else if metric == .dailyVibe {
+
+                    DailyVibeRectangularView(
+                        entry: entry
+                    )
+
+                } else {
+
+                    RectangularMetricView(
+                        metric: metric,
+                        style: style,
+                        entry: entry
+                    )
+                }
 
 
-        case .accessoryCorner:
-
-            Text(
-                entry.formattedValue(
-                    for: normalizedMetric
-                )
-            )
-            .widgetLabel {
+            case .accessoryInline:
 
                 Label(
-                    normalizedMetric.displayName,
+                    "\(normalizedMetric.displayName) \(entry.formattedValue(for: normalizedMetric))",
                     systemImage:
                         normalizedMetric.systemImage
                 )
-            }
 
 
-        default:
+            case .accessoryCorner:
 
-            Text(
-                entry.formattedValue(
-                    for: normalizedMetric
+                Text(
+                    entry.formattedValue(
+                        for: normalizedMetric
+                    )
                 )
-            )
+                .widgetLabel {
+
+                    Label(
+                        normalizedMetric.displayName,
+                        systemImage:
+                            normalizedMetric.systemImage
+                    )
+                }
+
+
+            default:
+
+                Text(
+                    entry.formattedValue(
+                        for: normalizedMetric
+                    )
+                )
+            }
         }
+        .widgetURL(
+            metric.deepLinkURL
+        )
     }
 
 
@@ -646,6 +669,7 @@ struct ActivityRingsRectangularView: View {
 
     let entry: SimpleEntry
 
+
     var body: some View {
 
         GeometryReader { geometry in
@@ -656,7 +680,8 @@ struct ActivityRingsRectangularView: View {
                     title: "MOVE",
                     value: "\(Int(entry.activeEnergy))",
                     progress: min(
-                        entry.activeEnergy / 500,
+                        entry.activeEnergy
+                        / max(entry.moveGoal, 1),
                         1
                     ),
                     diameter: min(
@@ -664,12 +689,14 @@ struct ActivityRingsRectangularView: View {
                         geometry.size.height * 0.82
                     )
                 )
+
 
                 ActivityMiniRing(
                     title: "EXERCISE",
                     value: "\(Int(entry.exerciseMinutes))",
                     progress: min(
-                        entry.exerciseMinutes / 30,
+                        entry.exerciseMinutes
+                        / max(entry.exerciseGoal, 1),
                         1
                     ),
                     diameter: min(
@@ -678,11 +705,13 @@ struct ActivityRingsRectangularView: View {
                     )
                 )
 
+
                 ActivityMiniRing(
                     title: "STAND",
                     value: "\(Int(entry.standHours))",
                     progress: min(
-                        entry.standHours / 12,
+                        entry.standHours
+                        / max(entry.standGoal, 1),
                         1
                     ),
                     diameter: min(
@@ -708,6 +737,7 @@ struct ActivityMiniRing: View {
     let progress: Double
     let diameter: CGFloat
 
+
     var body: some View {
 
         VStack(spacing: 4) {
@@ -719,6 +749,7 @@ struct ActivityMiniRing: View {
                         .secondary.opacity(0.18),
                         lineWidth: 6
                     )
+
 
                 Circle()
                     .trim(
@@ -740,6 +771,7 @@ struct ActivityMiniRing: View {
                     )
                     .widgetAccentable()
 
+
                 Text(value)
                     .font(
                         .system(
@@ -755,6 +787,7 @@ struct ActivityMiniRing: View {
                 width: diameter,
                 height: diameter
             )
+
 
             Text(title)
                 .font(
@@ -856,6 +889,7 @@ struct DailyVibeRectangularView: View {
                             )
                         )
 
+
                     Capsule()
                         .fill(.primary)
                         .frame(
@@ -948,6 +982,7 @@ struct CircularRingMetricView: View {
     let metric: HealthMetric
     let entry: SimpleEntry
 
+
     var body: some View {
 
         ZStack {
@@ -959,6 +994,7 @@ struct CircularRingMetricView: View {
                         .secondary.opacity(0.20),
                         lineWidth: 4
                     )
+
 
                 Circle()
                     .trim(
@@ -1358,6 +1394,10 @@ private extension SimpleEntry {
             activeEnergy: 159,
             exerciseMinutes: 1,
             standHours: 5,
+
+            moveGoal: 300,
+            exerciseGoal: 30,
+            standGoal: 10,
 
             recovery: 97,
             strain: 35
