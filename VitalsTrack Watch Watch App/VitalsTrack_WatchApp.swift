@@ -20,6 +20,36 @@ struct VitalsTrack_Watch_Watch_AppApp: App {
         WindowGroup {
 
             ContentView()
+                .onOpenURL { url in
+
+                    guard
+                        url.scheme == "zevli",
+                        url.host == "metric"
+                    else {
+                        return
+                    }
+
+
+                    let metric =
+                        url.pathComponents
+                            .filter {
+                                $0 != "/"
+                            }
+                            .first
+
+
+                    guard
+                        let metric
+                    else {
+                        return
+                    }
+
+
+                    NotificationCenter.default.post(
+                        name: .zevliMetricDeepLink,
+                        object: metric
+                    )
+                }
                 .task {
 
                     await healthBackgroundManager

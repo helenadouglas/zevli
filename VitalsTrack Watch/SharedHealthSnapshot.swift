@@ -20,84 +20,162 @@ struct SharedHealthSnapshot: Codable {
     var exerciseMinutes: Double
     var standHours: Double
 
+    var moveGoal: Double
+    var exerciseGoal: Double
+    var standGoal: Double
+
     var recovery: Double
     var strain: Double
 
 
-    static let empty = SharedHealthSnapshot(
-        updatedAt: .distantPast,
+    static let empty =
+        SharedHealthSnapshot(
+            updatedAt:
+                .distantPast,
 
-        sleepHours: 0,
-        sleepScore: 0,
+            sleepHours:
+                0,
 
-        readiness: 0,
-        activity: 0,
+            sleepScore:
+                0,
 
-        hrv: 0,
-        restingHeartRate: 0,
-        heartRate: 0,
+            readiness:
+                0,
 
-        steps: 0,
-        activeEnergy: 0,
-        exerciseMinutes: 0,
-        standHours: 0,
+            activity:
+                0,
 
-        recovery: 0,
-        strain: 0
-    )
+            hrv:
+                0,
+
+            restingHeartRate:
+                0,
+
+            heartRate:
+                0,
+
+            steps:
+                0,
+
+            activeEnergy:
+                0,
+
+            exerciseMinutes:
+                0,
+
+            standHours:
+                0,
+
+            moveGoal:
+                300,
+
+            exerciseGoal:
+                30,
+
+            standGoal:
+                10,
+
+            recovery:
+                0,
+
+            strain:
+                0
+        )
 
 
-    static let preview = SharedHealthSnapshot(
-        updatedAt: .now,
+    static let preview =
+        SharedHealthSnapshot(
+            updatedAt:
+                .now,
 
-        sleepHours: 8.0,
-        sleepScore: 100,
+            sleepHours:
+                8.0,
 
-        readiness: 82,
-        activity: 64,
+            sleepScore:
+                100,
 
-        hrv: 62,
-        restingHeartRate: 65,
-        heartRate: 72,
+            readiness:
+                82,
 
-        steps: 11_648,
-        activeEnergy: 320,
-        exerciseMinutes: 24,
-        standHours: 8,
+            activity:
+                64,
 
-        recovery: 82,
-        strain: 35
-    )
+            hrv:
+                62,
+
+            restingHeartRate:
+                65,
+
+            heartRate:
+                72,
+
+            steps:
+                11_648,
+
+            activeEnergy:
+                320,
+
+            exerciseMinutes:
+                24,
+
+            standHours:
+                8,
+
+            moveGoal:
+                300,
+
+            exerciseGoal:
+                30,
+
+            standGoal:
+                10,
+
+            recovery:
+                82,
+
+            strain:
+                35
+        )
 }
 
+
+// MARK: - Shared Store
 
 enum SharedHealthStore {
 
     static let appGroup =
         "group.com.helenadouglas.vitalstrack"
 
+
     static let snapshotKey =
         "healthSnapshot"
+
 
     static let widgetKind =
         "VitalsTrack_Watch"
 
 
-    static var defaults: UserDefaults? {
+    static var defaults:
+        UserDefaults? {
 
         UserDefaults(
-            suiteName: appGroup
+            suiteName:
+                appGroup
         )
     }
 
 
     static func save(
-        _ snapshot: SharedHealthSnapshot
+        _ snapshot:
+            SharedHealthSnapshot
     ) {
 
         guard
-            let data = try? JSONEncoder()
-                .encode(snapshot)
+            let data =
+                try? JSONEncoder()
+                    .encode(
+                        snapshot
+                    )
         else {
             return
         }
@@ -105,26 +183,33 @@ enum SharedHealthStore {
 
         defaults?.set(
             data,
-            forKey: snapshotKey
+            forKey:
+                snapshotKey
         )
     }
 
 
-    static func load() -> SharedHealthSnapshot {
+    static func load()
+        -> SharedHealthSnapshot {
 
         guard
             let data =
-                defaults?.data(
-                    forKey: snapshotKey
-                ),
+                defaults?
+                    .data(
+                        forKey:
+                            snapshotKey
+                    ),
 
             let snapshot =
                 try? JSONDecoder()
                     .decode(
                         SharedHealthSnapshot.self,
-                        from: data
+                        from:
+                            data
                     )
+
         else {
+
             return .empty
         }
 
