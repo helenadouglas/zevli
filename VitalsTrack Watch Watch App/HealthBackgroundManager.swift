@@ -7,9 +7,14 @@
 
 import Foundation
 import HealthKit
+import WatchKit
 
 
 final class HealthBackgroundManager {
+
+    static let backgroundRefreshIdentifier =
+        "zevli.health.refresh"
+
 
     private let healthStore =
         HKHealthStore()
@@ -52,20 +57,86 @@ final class HealthBackgroundManager {
         )
 
 
-        // Start observer queries immediately.
-        // HealthKit can then wake the app when matching
-        // health samples are added or changed.
+        // Start HealthKit observers as early as possible.
         startObserverQueries()
 
 
-        // Register the HealthKit types for background delivery.
+        // Enable background HealthKit delivery.
         await enableBackgroundDelivery()
 
 
-        // Always create a fresh snapshot when the Watch app
-        // itself launches.
+        // Refresh immediately whenever Zevli launches.
         await healthProvider
             .refreshSharedSnapshot()
+
+
+        // Ask watchOS for another opportunity to refresh
+        // in roughly 15 minutes.
+        scheduleNextBackgroundRefresh()
+    }
+
+
+    // MARK: - Scheduled Background Refresh
+
+    func handleBackgroundRefresh() async {
+
+        print(
+            "Zevli scheduled background refresh started"
+        )
+
+
+        await healthProvider
+            .refreshSharedSnapshot()
+
+
+        print(
+            "Zevli scheduled background refresh finished"
+        )
+
+
+        // Every background run requests the next one.
+        scheduleNextBackgroundRefresh()
+    }
+
+
+    // MARK: - Schedule Next Refresh
+
+    private func scheduleNextBackgroundRefresh() {
+
+        let preferredDate =
+            Date().addingTimeInterval(
+                15 * 60
+            )
+
+
+        WKApplication.shared()
+            .scheduleBackgroundRefresh(
+                withPreferredDate:
+                    preferredDate,
+
+                userInfo:
+                    Self
+                        .backgroundRefreshIdentifier
+                        as NSString
+            ) {
+                error in
+
+
+                if let error {
+
+                    print(
+                        "Failed to schedule Zevli background refresh:",
+                        error.localizedDescription
+                    )
+
+                } else {
+
+                    print(
+                        "Zevli background refresh requested for:",
+                        preferredDate
+                    )
+                }
+            }
     }
 
 

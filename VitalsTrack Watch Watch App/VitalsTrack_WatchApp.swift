@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import WatchKit
 
 
 @main
@@ -55,6 +56,16 @@ struct VitalsTrack_Watch_Watch_AppApp: App {
                     await healthBackgroundManager
                         .start()
                 }
+        }
+        .backgroundTask(
+            .appRefresh(
+                HealthBackgroundManager
+                    .backgroundRefreshIdentifier
+            )
+        ) {
+
+            await healthBackgroundManager
+                .handleBackgroundRefresh()
         }
     }
 }
